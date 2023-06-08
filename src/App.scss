@@ -110,5 +110,13 @@ code {
     }
   }
 
+  .customize-table {
+    width: inherit;
+    overflow-x: auto;
+
+    button {
+      width: 74px;
+    }
+  }
 
 }

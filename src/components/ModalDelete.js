@@ -15,7 +15,7 @@ const ModalDelete = (props) => {
             handleClose()
             toast.success("Delete user succed")
         }else{
-            toast.error("An error...")
+            toast.error("An esrror...")
         }
         console.log(res)
     }

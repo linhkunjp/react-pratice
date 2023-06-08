@@ -1,11 +1,15 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { loginUser } from "../services/userService"
 import 'react-toastify/dist/ReactToastify.css';
 import {  toast, ToastContainer } from 'react-toastify'
 import { useNavigate } from "react-router-dom";
+import { useContext } from 'react';
+import { UserContext } from '../context/UserContext';
 
 
 const Login = () => {
+
+    const { loginContext } = useContext(UserContext)
 
     const navigate = useNavigate()
 
@@ -15,38 +19,39 @@ const Login = () => {
 
     const [loadingApi, setLoadingApi] = useState(false)
 
-    useEffect(() => {
-        let token = localStorage.getItem("token")
-        if(token){
-            navigate("/")
-        }
-    }, [])
-
     const handleLogin = async () =>{
         if(!email || !password){
             toast.error("Email/Password is required!")
-            
         }
 
         setLoadingApi(true)
         let res = await loginUser(email, password)
-        console.log(res)
+
         if (res && res.token){
-            localStorage.setItem("token", res.token)
-            toast.success("Login successful!")
+            loginContext(email, res.token)
             navigate("/")
+            toast.success("Login successful!")
         } else {
             if (res && res.status === 400){
                 toast.error(res.data.error)
-                // alert(res.data.error)
             }
         }
         setLoadingApi(false)
     }
 
+    const handleBack = () => {
+        navigate("/")
+    }
+
+    const handlePressEnter = (event) => {
+        if(event && event.key === "Enter") {
+            handleLogin()
+        }
+    }
+
     return (
         <>
-            <div className="login-container col-10 col-sm-4">
+            <div className="login-container col-10 col-sm-3">
 
                 <div className="title">Login</div>
                 <div className="text">Email or username - eve.holt@reqres.in</div>
@@ -58,13 +63,14 @@ const Login = () => {
                 />
                 <div className="input-password">
                     <input 
-                        type={showPassword === true ? "text" : "password" } 
+                        type={showPassword === false ? "text" : "password" } 
                         placeholder="Password"
                         value={password}
                         onChange={event => setPassword(event.target.value)}
+                        onKeyDown={event => handlePressEnter(event)}
                     />
                     <i 
-                        className={showPassword === true ? "fa-solid fa-eye" : "fa-solid fa-eye-slash"}
+                        className={showPassword === false ? "fa-solid fa-eye" : "fa-solid fa-eye-slash"}
                         onClick={() => setShowPassword(!showPassword)}
                     ></i>
                 </div>
@@ -77,7 +83,7 @@ const Login = () => {
                     &nbsp;Login</button>
                 <div className="go-back">
                     <i className="fa-solid fa-angle-left">&nbsp;</i>
-                    Go back
+                    <span onClick={() => handleBack()}>Go back</span>
                 </div>
             </div>
             <ToastContainer/>
