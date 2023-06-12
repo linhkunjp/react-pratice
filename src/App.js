@@ -3,9 +3,11 @@ import Header from './components/Header';
 import { useContext, useEffect } from 'react';
 import { UserContext } from './context/UserContext';
 import AppRoutes from './routes/AppRoutes';
+import { useSelector } from 'react-redux';
 
 function App() {
 
+  const dataUserRedux = useSelector(state => state.user.account)
   const { user, loginContext } = useContext(UserContext)
 
   console.log("user", user)
