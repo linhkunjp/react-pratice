@@ -1,42 +1,29 @@
-import { useState } from "react"
-import { loginUser } from "../services/userService"
+import { useEffect, useState } from "react"
 import 'react-toastify/dist/ReactToastify.css';
 import {  toast, ToastContainer } from 'react-toastify'
 import { useNavigate } from "react-router-dom";
-import { useContext } from 'react';
-import { UserContext } from '../context/UserContext';
-
+import { handleLoginRedux } from "../redux/actions/userAction";
+import { useDispatch, useSelector } from "react-redux";
 
 const Login = () => {
 
-    const { loginContext } = useContext(UserContext)
-
     const navigate = useNavigate()
+    const dispatch = useDispatch()
 
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [showPassword, setShowPassword] = useState(true)
 
-    const [loadingApi, setLoadingApi] = useState(false)
+    const isLoading = useSelector( state => state.user.isLoading )
+    const account = useSelector( state => state.user.account )
 
     const handleLogin = async () =>{
         if(!email || !password){
             toast.error("Email/Password is required!")
         }
 
-        setLoadingApi(true)
-        let res = await loginUser(email, password)
-
-        if (res && res.token){
-            loginContext(email, res.token)
-            navigate("/")
-            toast.success("Login successful!")
-        } else {
-            if (res && res.status === 400){
-                toast.error(res.data.error)
-            }
-        }
-        setLoadingApi(false)
+        dispatch( handleLoginRedux( email, password ) )
+        
     }
 
     const handleBack = () => {
@@ -48,6 +35,12 @@ const Login = () => {
             handleLogin()
         }
     }
+
+    useEffect(() => {
+        if ( account && account.auth === true ){
+            navigate("/")
+        }
+    }, [account])
 
     return (
         <>
@@ -79,7 +72,7 @@ const Login = () => {
                     disabled={email && password ? false : true}
                     onClick={() => handleLogin()}
                 >
-                    {loadingApi &&<i className="fa-solid fa-cog fa-spin fa-spin-reverse"></i> }
+                    {isLoading &&<i className="fa-solid fa-cog fa-spin fa-spin-reverse"></i> }
                     &nbsp;Login</button>
                 <div className="go-back">
                     <i className="fa-solid fa-angle-left">&nbsp;</i>
